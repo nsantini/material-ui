@@ -7,6 +7,36 @@ import Paper from '../Paper';
 import throttle from 'lodash.throttle';
 import PopoverAnimationDefault from './PopoverAnimationDefault';
 
+var userAgent = "test";
+if (typeof window !== 'undefined') {
+    userAgent = window.navigator.userAgent.toLowerCase();
+}
+var device = {};
+
+device.ios = function () {
+    return device.iphone() || device.ipod() || device.ipad();
+};
+
+device.iphone = function () {
+    return !device.windows() && find('iphone');
+};
+
+device.ipod = function () {
+    return find('ipod');
+};
+
+device.ipad = function () {
+    return find('ipad');
+};
+
+device.windows = function () {
+    return find('windows');
+};
+
+var find = function (needle) {
+    return userAgent.indexOf(needle) !== -1;
+};
+
 class Popover extends Component {
   static propTypes = {
     /**
@@ -209,8 +239,13 @@ class Popover extends Component {
       height: el.offsetHeight,
     };
 
+    var offsetTop = 0;
+    if (typeof window !== 'undefined') {
+        offsetTop = window.jQuery(el).offset().top;
+    }
+
     a.right = rect.right || a.left + a.width;
-    a.bottom = rect.bottom || a.top + a.height;
+    a.bottom = (device.ios()?offsetTop + a.height:rect.bottom) || (device.ios()?offsetTop:a.top) + a.height;
     a.middle = a.left + ((a.right - a.left) / 2);
     a.center = a.top + ((a.bottom - a.top) / 2);
 
