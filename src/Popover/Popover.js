@@ -7,35 +7,52 @@ import Paper from '../Paper';
 import throttle from 'lodash.throttle';
 import PopoverAnimationDefault from './PopoverAnimationDefault';
 
-var userAgent = "test";
+let userAgent = ""
 if (typeof window !== 'undefined') {
-    userAgent = window.navigator.userAgent.toLowerCase();
+    userAgent = window.navigator.userAgent.toLowerCase()
 }
-var device = {};
 
-device.ios = function () {
-    return device.iphone() || device.ipod() || device.ipad();
-};
+const getOffsetTop = (elem) => {
 
-device.iphone = function () {
-    return !device.windows() && find('iphone');
-};
+    let yPos = elem.offsetTop
+    let tempEl = elem.offsetParent
 
-device.ipod = function () {
-    return find('ipod');
-};
+    while ( tempEl != null )
+    {
+        yPos += tempEl.offsetTop
+        tempEl = tempEl.offsetParent
+    }
 
-device.ipad = function () {
-    return find('ipad');
-};
+    return yPos
+}
 
-device.windows = function () {
-    return find('windows');
-};
+class Device {
+    ios() {
+        return this.iphone() || this.ipod() || this.ipad()
+    }
 
-var find = function (needle) {
-    return userAgent.indexOf(needle) !== -1;
-};
+    iphone() {
+        return !this.windows() && this.find('iphone')
+    }
+
+    ipod() {
+        return this.find('ipod')
+    }
+
+    ipad() {
+        return this.find('ipad')
+    }
+
+    windows() {
+        return this.find('windows')
+    }
+
+    find(needle) {
+        return userAgent.indexOf(needle) !== -1
+    }
+}
+
+const device = new Device()
 
 class Popover extends Component {
   static propTypes = {
@@ -239,10 +256,7 @@ class Popover extends Component {
       height: el.offsetHeight,
     };
 
-    var offsetTop = 0;
-    if (typeof window !== 'undefined') {
-        offsetTop = window.jQuery(el).offset().top;
-    }
+    var offsetTop = getOffsetTop(el)
 
     a.right = rect.right || a.left + a.width;
     a.bottom = (device.ios()?offsetTop + a.height:rect.bottom) || (device.ios()?offsetTop:a.top) + a.height;
